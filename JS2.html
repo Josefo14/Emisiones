@@ -1,0 +1,151 @@
+
+<script>
+    /*window.addEventListener("load", function(){
+    window.addEventListener("click", lookforData)});*/
+    window.addEventListener("load", function(){
+      lookforData();
+      for(let i=0;i <th.length;i++){
+        th[i].addEventListener("click",headerClicked)
+      }
+    });
+    const th = document.getElementsByTagName("th");
+
+
+      function headerClicked(e){
+         /*console.log(e.target.parentNode.cellIndex);*/
+         const sortColumn = e.target.cellIndex !== undefined ? e.target.cellIndex : e.target.parentNode.cellIndex;
+         const icons=document.querySelectorAll(".th-icon");
+         icons.forEach(icon=>{
+            if (icon.classList.contains("th-icon-active")){
+              icon.classList.remove("th-icon-active");
+            }
+            if(icon.parentNode.cellIndex===sortColumn){
+              icon.classList.add("th-icon-active");
+            }
+         })
+          
+         /*console.log(sortColumn);*/
+         sortablebycolumn(sortColumn)
+      }
+
+      function sortablebycolumn(sortColumn){
+        const tableBody=document.getElementById("tbody-emisiones");
+        /*console.log(tableBody);*/
+
+        const rows= Array.from(tableBody.rows);
+        /*var asc=true;*/
+        var assClass = tableBody.classList.contains("asc");
+        var asc = !assClass ? true : false; 
+
+        if(asc===true && sortColumn !==1){
+          var sortedRows=rows.sort(function(a,b){
+            /*console.log(a.cells[sortColumn]);*/
+            const aText=a.cells[sortColumn].textContent;
+            const bText=b.cells[sortColumn].textContent;
+            return aText.localeCompare(bText);
+          });
+        }
+        if(asc===false && sortColumn !==1){
+           var sortedRows=rows.sort(function(a,b){
+            /*console.log(a.cells[sortColumn]);*/
+            const aText=a.cells[sortColumn].textContent;
+            const bText=b.cells[sortColumn].textContent;
+            return bText.localeCompare(aText);
+          });
+        } 
+         if(asc===true && sortColumn ===1){
+           var sortedRows=rows.sort(function(a,b){
+            /*console.log(a.cells[sortColumn]);*/
+            const aText=a.cells[sortColumn].textContent;
+            const bText=b.cells[sortColumn].textContent;
+            const aDate=aText.split('/').reverse().join();
+            const bDate=bText.split('/').reverse().join();
+            return new Date(aDate) - new Date(bDate);
+          });
+
+        }
+         if(asc===false && sortColumn ===1){
+            var sortedRows=rows.sort(function(a,b){
+            /*console.log(a.cells[sortColumn]);*/
+            const aText=a.cells[sortColumn].textContent;
+            const bText=b.cells[sortColumn].textContent;
+            const aDate=aText.split('/').reverse().join();
+            const bDate=bText.split('/').reverse().join();
+            return new Date(bDate)-new Date(aDate);
+          });
+        }
+
+        /*console.log(sortedRows);*/
+        tableBody.innerHTML="";
+        sortedRows.forEach(row=>{
+          tableBody.appendChild(row);
+        
+        });
+        if(asc===true){
+          tableBody.classList.add("asc");
+        }else{
+          tableBody.classList.remove("asc");
+        }
+
+      }
+
+
+      function lookforData(){
+       google.script.run
+       .withSuccessHandler( emisiones=>{
+         let tableBody=document.getElementById("tbody-emisiones");
+         var template= document.getElementById("rowtemplate");  
+         var templateContent=template.content;
+  
+         emisiones.forEach(emision=>{
+           const tr=templateContent.cloneNode(true);
+
+           const distritoCol=tr.querySelector(".template-distrito");
+           const fechaCol=tr.querySelector(".template-fecha");
+           const idCol=tr.querySelector(".template-id");
+           const locacionCol=tr.querySelector(".template-locacion");
+           const sistemaCol=tr.querySelector(".template-sistema");
+           const componenteCol=tr.querySelector(".template-componente");
+           const tipoCol=tr.querySelector(".template-tipo");
+           const gradoCol=tr.querySelector(".template-grado");
+           const qch4Col=tr.querySelector(".template-qch4");
+           const geitCol=tr.querySelector(".template-geit");
+            distritoCol.textContent=emision[1];
+            fechaCol.textContent=emision[9];
+            idCol.textContent=emision[2];
+            locacionCol.textContent=emision[3];
+            sistemaCol.textContent=emision[4];
+            componenteCol.textContent=emision[5];
+            tipoCol.textContent=emision[6];
+            gradoCol.textContent=emision[8];
+            qch4Col.textContent=emision[11];
+            geitCol.textContent=emision[18];
+
+            tableBody.appendChild(tr);
+         });
+       })
+       .getData();
+      }
+
+      document.getElementById("input-search").addEventListener( "input", onInputChange );
+
+      function onInputChange(){
+        let inputText=document.getElementById("input-search").value.toString().toLowerCase();
+        /*console.log(inputText);*/
+        let tableBody=document.getElementById("tbody-emisiones");
+        let tableRows=tableBody.getElementsByTagName("tr");
+        /*console.log(tableRows);*/
+        for(let i=0;i < tableRows.length;i++){
+          /*console.log(tableRows[i]);*/
+          let textoConsulta=tableRows[i].cells[3].textContent.toString().toLowerCase();
+          if( textoConsulta.indexOf(inputText)===-1){
+              tableRows[i].style.visibility="collapse";
+          }else{
+              tableRows[i].style.visibility="";
+          }
+        }
+      }
+
+ </script>
+
+ 
